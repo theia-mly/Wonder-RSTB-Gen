@@ -1,5 +1,5 @@
 # Wonder RSTB Gen
-This tool is a small generator for size tables, intended for mods. This tool is made with SMB Wonder v1.0.0 in mind, but might work for other games as well.
+This tool is a small generator for size tables, intended for mods. This tool is made with SMB Wonder in mind, but might work for other games as well.
 
 ## Prerequisits
 You need to have .NET 8.0 installed.
