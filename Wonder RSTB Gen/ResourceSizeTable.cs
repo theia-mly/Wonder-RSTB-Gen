@@ -85,10 +85,10 @@ namespace ResourceSizeTable
             }
         }
 
-        public ResourceSizeTable(string path, bool isCompressed)
+        public ResourceSizeTable(string path)
         {
             RSTBPath = path;
-            Load(path, isCompressed);
+            Load(path);
         }
 
         public DecompressionStream DecompressStream(FileStream compressedStream)
@@ -319,19 +319,13 @@ namespace ResourceSizeTable
             return 0x12 + 8 * Crc32bPairCount + (StringSize + 4) * CollisionPairCount;
         }
 
-        public void Load(string path, bool isCompressed)
+        public void Load(string path)
         {
             // Get file
             using (FileStream fileStream = File.OpenRead(path))
             {
-                if (isCompressed)
-                {
-                    DecompressionStream fileStreamDecomp = DecompressStream(fileStream);
-                    ReadFile(fileStreamDecomp);
-                } else
-                {
-                    ReadFile(fileStream);
-                }
+                DecompressionStream fileStreamDecomp = DecompressStream(fileStream);
+                ReadFile(fileStreamDecomp);
 
                 fileStream.Close();
             }
