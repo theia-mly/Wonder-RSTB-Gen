@@ -8,6 +8,7 @@ using ZstdSharp;
 using System.IO.Hashing;
 using System.IO;
 using System.Linq.Expressions;
+using CRC32B;
 
 namespace ResourceSizeTable
 {
@@ -17,7 +18,7 @@ namespace ResourceSizeTable
         string Magic;
         UInt32 Version;
         UInt32 StringSize;
-        UInt32 Crc32bPairCount;
+        public UInt32 Crc32bPairCount;
         UInt32 CollisionPairCount;
         Dictionary<UInt32, UInt32> Crc32bTable = new Dictionary<UInt32, UInt32>();
         Dictionary<string, UInt32> CollisionPathPairTable = new Dictionary<string, UInt32>();
@@ -141,38 +142,22 @@ namespace ResourceSizeTable
 
                 for (int i = 0; i < CollisionPairCount; i++)
                 {
-                    string key = new string(reader.ReadChars(4));
+                    string key = new string(reader.ReadChars((int)StringSize));
                     UInt32 value = reader.ReadUInt32();
                     CollisionPathPairTable.Add(key, value);
                 }
             }
         }
 
-        private void AddCrc32bEntry(UInt32 hash, UInt32 value)
-        {
-            Crc32bPairCount++;
-            Crc32bTable.Add(hash, value);
-        }
-
-        private void AddCrc32bEntryFromPath(string path, UInt32 value)
-        {
-            UInt32 hash = (UInt32)BitConverter.ToInt32(System.IO.Hashing.Crc32.Hash(Encoding.UTF8.GetBytes(path)));
-            AddCrc32bEntry(hash, value);
-        }
-
         private void EditCrc32bEntry(UInt32 hash, UInt32 value)
         {
-            try
-            {
-                Crc32bTable[hash] = value;
-            } catch {
-                AddCrc32bEntry(hash, value);
-            }
+            Crc32bTable[hash] = value;
+            Crc32bPairCount = (UInt32)Crc32bTable.Count;
         }
 
         private void EditCrc32bEntryFromPath(string path, UInt32 value)
         {
-            UInt32 hash = (UInt32)BitConverter.ToInt32(System.IO.Hashing.Crc32.Hash(Encoding.UTF8.GetBytes(path)));
+            UInt32 hash = (UInt32)CRC32B.CRC32B.Compute(path);
             EditCrc32bEntry(hash, value);
         }
 
@@ -282,7 +267,7 @@ namespace ResourceSizeTable
 
                 if (!file.Contains("ResourceSizeTable") && !file.Contains("ignore__"))
                 {
-                    string relPath = file.Split(path).Last();
+                    string relPath = file.Split(path).Last().Replace("\\", "/").Substring(1);
                     relPath = relPath.Replace(".zs", "");
                     UInt32 size = CalcSizeFromFile(file);
 
@@ -305,7 +290,7 @@ namespace ResourceSizeTable
                 }
             }
 
-            string relPathRSTB = RSTBPath.Split(path).Last();
+            string relPathRSTB = RSTBPath.Split(path).Last().Replace("\\", "/").Substring(1);
             relPathRSTB = relPathRSTB.Replace(".zs", "");
             UInt32 sizeRSTB = GetRSTBSize() + FileTypeSizeTable["rsizetable"];
 
