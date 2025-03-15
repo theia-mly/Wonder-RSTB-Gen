@@ -233,10 +233,7 @@ namespace ResourceSizeTable
 
         private UInt32 CalcSizeForBFRES(UInt32 fileSize)
         {
-            if (fileSize <= 100000)
-                return (UInt32)(1.01 * fileSize + 40565);
-            else
-                return (UInt32)(1.01 * fileSize + 100565);
+            return (UInt32)(1.01 * fileSize + 1205565);
         }
 
         private UInt32 CalcSizeForBGYML(UInt32 fileSize)
